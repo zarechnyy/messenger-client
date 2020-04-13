@@ -1,0 +1,40 @@
+PODS:
+  - InputBarAccessoryView (4.3.2):
+    - InputBarAccessoryView/Core (= 4.3.2)
+  - InputBarAccessoryView/Core (4.3.2)
+  - MessageKit (3.1.0):
+    - InputBarAccessoryView (~> 4.3.0)
+  - Starscream (4.0.0)
+  - SwCrypt (5.1.3)
+  - SwiftKeychainWrapper (3.4.0)
+  - SwiftyRSA (1.5.0):
+    - SwiftyRSA/ObjC (= 1.5.0)
+  - SwiftyRSA/ObjC (1.5.0)
+
+DEPENDENCIES:
+  - MessageKit
+  - Starscream
+  - SwCrypt
+  - SwiftKeychainWrapper
+  - SwiftyRSA
+
+SPEC REPOS:
+  trunk:
+    - InputBarAccessoryView
+    - MessageKit
+    - Starscream
+    - SwCrypt
+    - SwiftKeychainWrapper
+    - SwiftyRSA
+
+SPEC CHECKSUMS:
+  InputBarAccessoryView: 7985d418040a05fe894bd4b8328dd43ab35517c3
+  MessageKit: 3beb578737a5aa2bba25cc27c7b6d6faa09af5a7
+  Starscream: 04b26f02727e10a002e6b5d21b188ba0d049910b
+  SwCrypt: 0d1f951b8a993d6e107f4776ee0d72c1adafd1df
+  SwiftKeychainWrapper: 6fc49fbf7d4a6b0772917acb0e53a1639f6078d6
+  SwiftyRSA: 6e528fb1b1a87d5111c48081083b141d6d65f1cf
+
+PODFILE CHECKSUM: 8c6982c6ed9112ef4740e1180476fba4f36092a1
+
+COCOAPODS: 1.9.1
