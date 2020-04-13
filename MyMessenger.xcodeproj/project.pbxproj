@@ -20,6 +20,7 @@
 		2E2EC23223F0447F00CACDB9 /* Auth.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2E2EC23023F0447F00CACDB9 /* Auth.storyboard */; };
 		2E2EC23423F0448000CACDB9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2E2EC23323F0448000CACDB9 /* Assets.xcassets */; };
 		2E2EC23723F0448000CACDB9 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2E2EC23523F0448000CACDB9 /* LaunchScreen.storyboard */; };
+		2E560ED1244450C600FAF82C /* SocketService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E560ED0244450C600FAF82C /* SocketService.swift */; };
 		2E6DFF86243913F40072A412 /* AuthModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E6DFF85243913F40072A412 /* AuthModels.swift */; };
 		2E6DFF882439150C0072A412 /* ServerUserModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E6DFF872439150C0072A412 /* ServerUserModel.swift */; };
 		2E6DFF8A243915410072A412 /* StartChatModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E6DFF89243915410072A412 /* StartChatModel.swift */; };
@@ -51,6 +52,7 @@
 		2E2EC23323F0448000CACDB9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2E2EC23623F0448000CACDB9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		2E2EC23823F0448100CACDB9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2E560ED0244450C600FAF82C /* SocketService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketService.swift; sourceTree = "<group>"; };
 		2E6DFF85243913F40072A412 /* AuthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthModels.swift; sourceTree = "<group>"; };
 		2E6DFF872439150C0072A412 /* ServerUserModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerUserModel.swift; sourceTree = "<group>"; };
 		2E6DFF89243915410072A412 /* StartChatModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartChatModel.swift; sourceTree = "<group>"; };
@@ -193,16 +195,33 @@
 			isa = PBXGroup;
 			children = (
 				2E2EC23523F0448000CACDB9 /* LaunchScreen.storyboard */,
-				2E9260FE243E06BC000A196F /* AES.swift */,
 				2E067C7F23F94CD50022D3A5 /* Config.swift */,
+				2E560ECF2444509300FAF82C /* AES */,
 				2E067C8D23F98E8F0022D3A5 /* Navigation */,
 				2E067C8323F98B450022D3A5 /* SupportingFiles */,
 				2E067C8423F98CBE0022D3A5 /* Modules */,
 				2E067C8A23F98D2E0022D3A5 /* Resources */,
 				2E067C9623F995F80022D3A5 /* Model */,
 				2EE99E1424202F5000880E74 /* Extensions */,
+				2E560ED2244450DC00FAF82C /* Services */,
 			);
 			path = MyMessenger;
+			sourceTree = "<group>";
+		};
+		2E560ECF2444509300FAF82C /* AES */ = {
+			isa = PBXGroup;
+			children = (
+				2E9260FE243E06BC000A196F /* AES.swift */,
+			);
+			path = AES;
+			sourceTree = "<group>";
+		};
+		2E560ED2244450DC00FAF82C /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				2E560ED0244450C600FAF82C /* SocketService.swift */,
+			);
+			path = Services;
 			sourceTree = "<group>";
 		};
 		2E6DFF8B24391F530072A412 /* ChatVC */ = {
@@ -419,6 +438,7 @@
 				2E067C9423F995E80022D3A5 /* User.swift in Sources */,
 				2E6DFF882439150C0072A412 /* ServerUserModel.swift in Sources */,
 				2EE99E1324202F4C00880E74 /* UITableViewCell+Extensions.swift in Sources */,
+				2E560ED1244450C600FAF82C /* SocketService.swift in Sources */,
 				2E067C8823F98D0A0022D3A5 /* SignUpVC.swift in Sources */,
 				2EC6F5C2244123A300E1A6F9 /* MessageModel.swift in Sources */,
 				2E819FE1243F998600EB01DF /* CurrentUserModel.swift in Sources */,

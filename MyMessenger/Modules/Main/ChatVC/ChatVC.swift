@@ -9,18 +9,18 @@
 import UIKit
 import MessageKit
 import InputBarAccessoryView
-import Starscream
 import SwiftyRSA
 
 class ChatVC: MessagesViewController {
         
     var userPubKey: String!
     var user: ServerUserModel!
-    var messages: [Message] = []
-    var socket: WebSocket!
-    var aes: AES256!
-    let refreshControl = UIRefreshControl()
-    let formatter: DateFormatter = {
+    
+    private var _aes: AES256!
+    private var _messages: [Message] = []
+    private var _socketService: SocketService = SocketService()
+    
+    private let _formatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter
@@ -31,7 +31,6 @@ class ChatVC: MessagesViewController {
         configureSocketConnection()
         configureMessageInputBar()
         configureMessageCollectionView()
-        loadFirstMessages()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -42,29 +41,17 @@ class ChatVC: MessagesViewController {
     func configureSocketConnection() {
         var request = URLRequest(url: URL(string: "ws://localhost:8181/ws")!)
         request.setValue("Bearer \(User.current?.token ?? "")", forHTTPHeaderField: "Authorization")
-        socket = WebSocket(request: request)
-        socket.delegate = self
-        socket.connect()
+        _socketService.connect(with: request, delegate: self)
     }
     
     func configureMessageCollectionView() {
-        
         messagesCollectionView.messagesDataSource = self
-        messagesCollectionView.messageCellDelegate = self
         messagesCollectionView.messagesLayoutDelegate = self
         messagesCollectionView.messagesDisplayDelegate = self
 
         scrollsToBottomOnKeyboardBeginsEditing = true // default false
         maintainPositionOnKeyboardFrameChanged = true // default false
-        
-        messagesCollectionView.addSubview(refreshControl)
-        refreshControl.addTarget(self, action: #selector(loadMoreMessages), for: .valueChanged)
     }
-    
-    @objc func loadMoreMessages() {
-
-    }
-
     
     func configureMessageInputBar() {
         messageInputBar.delegate = self
@@ -76,31 +63,14 @@ class ChatVC: MessagesViewController {
         )
     }
     
-    func loadFirstMessages() {
-//        let user = UserKek(senderId: "kkk", displayName: "owowo")
-//        let message = Message(sender: user, messageId: UUID().uuidString, user: user, sentDate: Date(), kind: .text("ekekowowowl"), text: "ekekowowowl")
-//        let msgs = [message, message, message, message, message, message]
-//        self.messages = msgs
-//        DispatchQueue.global(qos: .userInitiated).async {
-//            let count = UserDefaults.standard.mockMessagesCount()
-//            SampleData.shared.getMessages(count: count) { messages in
-//                DispatchQueue.main.async {
-//                    self.messageList = messages
-                    self.messagesCollectionView.reloadData()
-                    self.messagesCollectionView.scrollToBottom()
-//                }
-//            }
-//        }
-    }
-
     
     func insertMessage(_ message: Message) {
-        messages.append(message)
-        // Reload last section to update header/footer labels and insert a new one
+        _messages.append(message)
+        
         messagesCollectionView.performBatchUpdates({
-            messagesCollectionView.insertSections([messages.count - 1])
-            if messages.count >= 2 {
-                messagesCollectionView.reloadSections([messages.count - 2])
+            messagesCollectionView.insertSections([_messages.count - 1])
+            if _messages.count >= 2 {
+                messagesCollectionView.reloadSections([_messages.count - 2])
             }
         }, completion: { [weak self] _ in
             if self?.isLastSectionVisible() == true {
@@ -110,69 +80,50 @@ class ChatVC: MessagesViewController {
     }
     
     func isLastSectionVisible() -> Bool {
-        
-        guard !messages.isEmpty else { return false }
-        
-        let lastIndexPath = IndexPath(item: 0, section: messages.count - 1)
-        
+        guard !_messages.isEmpty else { return false }
+        let lastIndexPath = IndexPath(item: 0, section: _messages.count - 1)
         return messagesCollectionView.indexPathsForVisibleItems.contains(lastIndexPath)
     }
-    
 }
 
-extension ChatVC: WebSocketDelegate {
+extension ChatVC: SocketServiceDelegate {
     
+    func didConnect() {
+        let messegeModel = SocketMessageModel(message: "\(user.id)")
+        let socketOnConnectModel = SocketResponseCommand(type: 0, model: .create(messegeModel))
+        _socketService.send(socketOnConnectModel)
+    }
     
-    
-    func didReceive(event: WebSocketEvent, client: WebSocket) {
-        print(event)
-        switch event {
-        case .viablityChanged(let state):
-            if state {
-                let messegeModel = SocketMessageModel(message: "\(user.id)")
-                let socketModel = SocketResponseCommand(type: 0, model: .create(messegeModel))
-                let encoder = JSONEncoder()
-                let data = try! encoder.encode(socketModel)
-                print(String(decoding: data, as: UTF8.self))
-                socket.write(data: data, completion: nil)
+    func didReceive(_ model: SocketResponseCommand) {
+        switch model.type {
+        case 1:
+            createKey()
+        case 2:
+            switch model.model {
+            case .key(let keyModel):
+                updateKey(keyModel)
+            default:
+                break
             }
-        case .text(let str):
-            let decoder = JSONDecoder()
-            let jsonData = Data(str.utf8)
-            do {
-                let model = try decoder.decode(SocketResponseCommand.self, from: jsonData)
-                print(model)
-                switch model.type {
-                case 1:
-                    createKey()
-                case 2:
-                    switch model.model {
-                    case .key(let keyModel):
-                        updateKey(keyModel)
-                    default:
-                        break
-                    }
-                case 3:
-                    switch model.model {
-                    case .messageResponse(let msg):
-                        updateMesseges(msg)
-                    default:
-                        break
-                    }
-                default:
-                    print("Unknown command!")
-                    print(model)
-                }
-            } catch let error {
-                print(error)
+        case 3:
+            switch model.model {
+            case .messageResponse(let msg):
+                updateMesseges(msg)
+            default:
+                break
             }
-        case .disconnected(let str, let code):
-            self.navigationController?.popViewController(animated: true)
-            print(str)
-            print(code)
         default:
-            break
+            print("Unknown command!")
+            print(model)
         }
+    }
+ 
+    func didReceive(_ error: Error?) {
+        guard let _ = error else { return }
+    }
+    
+    func didDisconnect() {
+        self.navigationController?.popViewController(animated: true)
     }
     
     private func createKey() {
@@ -181,9 +132,8 @@ extension ChatVC: WebSocketDelegate {
             let salt = AES256.randomSalt()
             let iv = AES256.randomIv()
             let key = try AES256.createKey(password: pw.data(using: .utf8)!, salt: salt)
-            aes = try AES256(key: key, iv: iv)
+            _aes = try AES256(key: key, iv: iv)
             
-            let encoder = JSONEncoder()
             let encrKeys = encrypted(key.hexString, userPubKey)
             let ecnrIvs = encrypted(iv.hexString, userPubKey)
             guard let encrKey = encrKeys.0, let encrSign = encrKeys.1 else { return }
@@ -193,10 +143,10 @@ extension ChatVC: WebSocketDelegate {
             socketKeyModel.signatureKey = encrSign
             socketKeyModel.signatureIv = encrIvSign
             
-            let socketModel = SocketResponseCommand(type: 2, model: .key(socketKeyModel))
-            let data = try encoder.encode(socketKeyModel)
-            print(socketModel)
-            socket.write(data: data, completion: nil)
+//            let socketModel = SocketResponseCommand(type: 2, model: .key(socketKeyModel))
+//            let data = try encoder.encode(socketKeyModel)
+            print(socketKeyModel)
+            _socketService.send(socketKeyModel)
         } catch let error {
             print(error)
         }
@@ -204,11 +154,16 @@ extension ChatVC: WebSocketDelegate {
     
     private func updateKey(_ model: SocketKeyModel) {
          do {
-            guard let privKey = User.current?.privateKey else { return }
-            guard let key = decrypted(model.key, privKey, model.signatureKey) else { return }
-            guard let iv = decrypted(model.iv, privKey, model.signatureIv) else { return }
-            guard let keyData = key.dataFromHexadecimalString(), let ivData = iv.dataFromHexadecimalString() else { return }
-            aes = try AES256(key: keyData, iv: ivData)
+            guard
+                let privKey = User.current?.privateKey,
+                let key = decrypted(model.key, privKey, model.signatureKey),
+                let iv = decrypted(model.iv, privKey, model.signatureIv),
+                let keyData = key.dataFromHexadecimalString(),
+                let ivData = iv.dataFromHexadecimalString() else {
+                    assertionFailure("CANT UPDATE AES KEY!")
+                    return
+                }
+            _aes = try AES256(key: keyData, iv: ivData)
          } catch let error {
             print(error)
          }
@@ -250,13 +205,12 @@ extension ChatVC: WebSocketDelegate {
     }
 
     private func updateMesseges(_ message: SocketDataStringModel) {
-        print(message.data)
         do {
             guard let data = Data(base64Encoded: message.data) else {
-                print("NO DATA(((")
+                print("NO DATA TO SEND :(")
                 return
             }
-            let encrData = try aes.decrypt(data)
+            let encrData = try _aes.decrypt(data)
             let str = String(decoding: encrData, as: UTF8.self)
             let message = Message(sender: user, messageId: UUID().uuidString, sentDate: Date(), kind: .text(str))
             insertMessage(message)
@@ -275,11 +229,11 @@ extension ChatVC: MessagesDataSource {
     }
     
     func messageForItem(at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> MessageType {
-        return messages[indexPath.section]
+        return _messages[indexPath.section]
     }
     
     func numberOfSections(in messagesCollectionView: MessagesCollectionView) -> Int {
-        return messages.count
+        return _messages.count
     }
     
     func cellTopLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
@@ -301,16 +255,9 @@ extension ChatVC: MessagesDataSource {
     
     func messageBottomLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
         
-        let dateString = formatter.string(from: message.sentDate)
+        let dateString = _formatter.string(from: message.sentDate)
         return NSAttributedString(string: dateString, attributes: [NSAttributedString.Key.font: UIFont.preferredFont(forTextStyle: .caption2)])
     }
-    
-
-
-}
-
-extension ChatVC: MessageCellDelegate {
-    
 }
 
 extension ChatVC: MessagesDisplayDelegate {
@@ -338,11 +285,6 @@ extension ChatVC: MessagesDisplayDelegate {
         let tail: MessageStyle.TailCorner = isFromCurrentSender(message: message) ? .bottomRight : .bottomLeft
         return .bubbleTail(tail, .curved)
     }
-//    
-//    func configureAvatarView(_ avatarView: AvatarView, for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) {
-////        let avatar = SampleData.shared.getAvatarFor(sender: message.sender)
-//        avatarView.set(avatar: <#T##Avatar#>)
-//    }
     
 }
 
@@ -378,18 +320,6 @@ extension ChatVC: MessagesLayoutDelegate {
 extension ChatVC: InputBarAccessoryViewDelegate {
     func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith text: String) {
 
-        // Here we can parse for which substrings were autocompleted
-        let attributedText = messageInputBar.inputTextView.attributedText!
-        let range = NSRange(location: 0, length: attributedText.length)
-        attributedText.enumerateAttribute(.autocompleted, in: range, options: []) { (_, range, _) in
-
-            let substring = attributedText.attributedSubstring(from: range)
-            let context = substring.attribute(.autocompletedContext, at: 0, effectiveRange: nil)
-            
-//            socket.write(data: <#T##Data#>, completion: <#T##(() -> ())?##(() -> ())?##() -> ()#>)
-//            print("Autocompleted: `", substring, "` with context: ", context ?? [])
-        }
-
         let components = inputBar.inputTextView.components
         messageInputBar.inputTextView.text = String()
         messageInputBar.invalidatePlugins()
@@ -404,15 +334,10 @@ extension ChatVC: InputBarAccessoryViewDelegate {
         for component in components {
             if  let str = component as? String {
                 do {
-                    let encoder = JSONEncoder()
-                    
                     guard let strData = str.data(using: .utf8) else { return }
-                    
-                    let encrMsgData = try aes.encrypt(strData)
+                    let encrMsgData = try _aes.encrypt(strData)
                     let msgModel = SocketResponseCommand(type: 3, model: .message(SocketDataModel(data: [UInt8](encrMsgData))))
-                    let data = try encoder.encode(msgModel)
-                    print(msgModel)
-                    self.socket.write(data: data, completion: nil)
+                    _socketService.send(msgModel)
                 } catch {
                     print(error)
                 }
