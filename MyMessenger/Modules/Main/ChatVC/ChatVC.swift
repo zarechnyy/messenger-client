@@ -31,6 +31,7 @@ class ChatVC: MessagesViewController {
         configureSocketConnection()
         configureMessageInputBar()
         configureMessageCollectionView()
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Close", style: .plain, target: self, action: #selector(close))
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -63,7 +64,6 @@ class ChatVC: MessagesViewController {
         )
     }
     
-    
     func insertMessage(_ message: Message) {
         _messages.append(message)
         
@@ -83,6 +83,11 @@ class ChatVC: MessagesViewController {
         guard !_messages.isEmpty else { return false }
         let lastIndexPath = IndexPath(item: 0, section: _messages.count - 1)
         return messagesCollectionView.indexPathsForVisibleItems.contains(lastIndexPath)
+    }
+    
+    @objc func close() {
+        _socketService.close()
+        self.navigationController?.popViewController(animated: true)
     }
 }
 
@@ -112,6 +117,13 @@ extension ChatVC: SocketServiceDelegate {
             default:
                 break
             }
+        case 5:
+            print(model)
+            switch model.model {
+            case .create(_):
+                self.navigationController?.popViewController(animated: true)
+            default: break
+            }
         default:
             print("Unknown command!")
             print(model)
@@ -123,6 +135,7 @@ extension ChatVC: SocketServiceDelegate {
     }
     
     func didDisconnect() {
+        _socketService.close()
         self.navigationController?.popViewController(animated: true)
     }
     
@@ -142,9 +155,6 @@ extension ChatVC: SocketServiceDelegate {
             var socketKeyModel = SocketKeyModel(key: encrKey, iv: encrIv)
             socketKeyModel.signatureKey = encrSign
             socketKeyModel.signatureIv = encrIvSign
-            
-//            let socketModel = SocketResponseCommand(type: 2, model: .key(socketKeyModel))
-//            let data = try encoder.encode(socketKeyModel)
             print(socketKeyModel)
             _socketService.send(socketKeyModel)
         } catch let error {

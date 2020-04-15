@@ -34,6 +34,10 @@ class SocketService {
         _webSocket.connect()
     }
     
+    func close() {
+        _webSocket.disconnect(closeCode: 1)
+    }
+    
     func send<T: Encodable>(_ model: T) {
         do {
             print(model)
@@ -50,7 +54,6 @@ extension SocketService: WebSocketDelegate {
         print(event)
         switch event {
         case .text(let message):
-            print(message)
             do {
                 let decoder = JSONDecoder()
                 let jsonData = Data(message.utf8)
@@ -64,7 +67,7 @@ extension SocketService: WebSocketDelegate {
             delegate?.didConnect()
         case .error(let error):
             delegate?.didReceive(error)
-        case .disconnected(_, _):
+        case .cancelled:
             delegate?.didDisconnect()
         default:
             break

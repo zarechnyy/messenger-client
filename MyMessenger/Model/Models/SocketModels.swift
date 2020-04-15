@@ -22,15 +22,15 @@ struct SocketResponseCommand: Codable {
         let type = try container.decode(Int.self, forKey: .type)
         self.type = type
         switch type {
-        case 0, 1:
+        case 0, 1, 5:
             let payload = try container.decode(SocketMessageModel.self, forKey: .model)
             self.model = .create(payload)
-        case 3:
-            let payload = try container.decode(SocketDataStringModel.self, forKey: .model)
-            self.model = .messageResponse(payload)
         case 2:
             let payload = try container.decode(SocketKeyModel.self, forKey: .model)
             self.model = .key(payload)
+        case 3:
+            let payload = try container.decode(SocketDataStringModel.self, forKey: .model)
+            self.model = .messageResponse(payload)
         default:
             self.model = .unsupported
         }
