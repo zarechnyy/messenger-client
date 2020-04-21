@@ -10,11 +10,7 @@ import UIKit
 import SwiftyRSA
 import SwCrypt
 
-extension Data {
-    var hexString: String {
-        return map { String(format: "%02hhx", $0) }.joined()
-    }
-}
+var mainSocketService: SocketService = SocketService()
 
 class MainVC: UIViewController {
     
@@ -23,12 +19,14 @@ class MainVC: UIViewController {
     fileprivate var networking = NetworkingService()
     fileprivate var items = [ServerUserModel]()
     fileprivate var selectedUser: ServerUserModel!
+    
         
     override func viewDidLoad() {
         super.viewDidLoad()
         configure()
+        configureSocketConnection()
     }
-
+    
     fileprivate func getAllUsers() {
         networking.performRequest(to: EndpointCollection.getAllUsers) { [weak self] (result: Result<UserModelResponse>) in
             switch result {
@@ -79,6 +77,41 @@ extension MainVC {
         tableView.tableFooterView = UIView()
         getAllUsers()
     }
+    
+    fileprivate func configureSocketConnection() {
+        var request = URLRequest(url: URL(string: "ws://localhost:8181/online")!)
+        request.setValue("Bearer \(User.current?.token ?? "")", forHTTPHeaderField: "Authorization")
+        mainSocketService.connect(with: request, delegate: self)
+    }
+}
+
+extension MainVC: SocketServiceDelegate {
+    func didConnect() { }
+    
+    func didReceive(_ error: Error?) { }
+    
+    func didReceive(_ model: SocketResponseCommand) {
+        switch model.model {
+        case .users(let response):
+            
+            for (index, _) in items.enumerated() {
+                items[index].setOffline()
+            }
+            
+            for (index, _) in items.enumerated() {
+                if response.users.contains(where: {$0.id == items[index].id}) {
+                    items[index].setOnline()
+                }
+            }
+            
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+        default: break
+        }
+    }
+    
+    func didDisconnect() { }
 }
 
 //MARK: - UITableViewDataSource
@@ -90,6 +123,12 @@ extension MainVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: ChatListCell.reuseIdentifier, for: indexPath) as! ChatListCell
         cell.titleLabel.text = items[indexPath.row].username
+        if items[indexPath.row].isOnline {
+            cell.statusView.backgroundColor = .green
+        } else {
+            cell.statusView.backgroundColor = .red
+        }
+        
         return cell
     }
 }

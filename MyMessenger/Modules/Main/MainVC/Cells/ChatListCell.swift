@@ -10,4 +10,12 @@ import UIKit
 
 class ChatListCell: UITableViewCell {
     @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var statusView: UIView!
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        
+        statusView.layer.cornerRadius = 6
+        statusView.backgroundColor = .red
+    }
 }

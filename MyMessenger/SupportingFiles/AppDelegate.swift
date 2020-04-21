@@ -20,6 +20,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.makeKeyAndVisible()
         return true
     }
+    
+    func applicationWillTerminate(_ application: UIApplication) {
+        let msgModel = SocketResponseCommand(type: 6, model: .create(SocketMessageModel(message: "")))
+        mainSocketService.send(msgModel)
+    }
 
 }
 

@@ -31,6 +31,9 @@ struct SocketResponseCommand: Codable {
         case 3:
             let payload = try container.decode(SocketDataStringModel.self, forKey: .model)
             self.model = .messageResponse(payload)
+        case 6:
+            let payload = try container.decode(UserModelResponse.self, forKey: .model)
+            self.model = .users(payload)
         default:
             self.model = .unsupported
         }
@@ -42,6 +45,7 @@ enum Model: Codable {
     case key(SocketKeyModel)
     case message(SocketDataModel)
     case messageResponse(SocketDataStringModel)
+    case users(UserModelResponse)
     case unsupported
 }
 

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="16096" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16086"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -21,13 +21,24 @@
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WeT-nD-TGN">
+                        <rect key="frame" x="382" y="16" width="12" height="12"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="12" id="1Fp-pm-RYs"/>
+                            <constraint firstAttribute="height" constant="12" id="5af-wG-Cra"/>
+                        </constraints>
+                    </view>
                 </subviews>
                 <constraints>
+                    <constraint firstAttribute="trailing" secondItem="WeT-nD-TGN" secondAttribute="trailing" constant="20" id="ESH-bN-DKU"/>
+                    <constraint firstItem="WeT-nD-TGN" firstAttribute="centerY" secondItem="9SG-Vr-Won" secondAttribute="centerY" id="ODs-Ti-gyQ"/>
                     <constraint firstItem="Vge-2H-2Is" firstAttribute="leading" secondItem="9SG-Vr-Won" secondAttribute="leading" constant="20" id="dbY-Lq-bZn"/>
                     <constraint firstItem="Vge-2H-2Is" firstAttribute="centerY" secondItem="9SG-Vr-Won" secondAttribute="centerY" id="gPM-i3-Do9"/>
                 </constraints>
             </tableViewCellContentView>
             <connections>
+                <outlet property="statusView" destination="WeT-nD-TGN" id="LcS-8J-kId"/>
                 <outlet property="titleLabel" destination="Vge-2H-2Is" id="HKi-Us-MM8"/>
             </connections>
             <point key="canvasLocation" x="139" y="83"/>

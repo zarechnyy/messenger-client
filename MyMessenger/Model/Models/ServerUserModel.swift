@@ -24,6 +24,20 @@ struct ServerUserModel: Codable, SenderType {
     
     let id: Int
     let username: String
+    
+    var isOnline: Bool = false
+    
+    mutating func setOffline() {
+        isOnline = false
+    }
+    
+    mutating func setOnline() {
+        isOnline = true
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case id, username
+    }
 }
 
 extension EndpointCollection {
