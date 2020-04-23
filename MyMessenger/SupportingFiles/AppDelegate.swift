@@ -22,7 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func applicationWillTerminate(_ application: UIApplication) {
-        let msgModel = SocketResponseCommand(type: 6, model: .create(SocketMessageModel(message: "")))
+        let msgModel = SocketResponseCommandModel(type: 6, model: .create(SocketMessageModel(message: "")))
         mainSocketService.send(msgModel)
     }
 

@@ -12,7 +12,7 @@ import Starscream
 protocol SocketServiceDelegate: AnyObject {
     func didConnect()
     func didReceive(_ error: Error?)
-    func didReceive(_ model: SocketResponseCommand)
+    func didReceive(_ model: SocketResponseCommandModel)
     func didDisconnect()
 }
 
@@ -23,15 +23,16 @@ class SocketService {
     private var _webSocket: WebSocket!
     private var _request: URLRequest!
     private let _encoder: JSONEncoder = JSONEncoder()
-    
+    private var _socketDelegateQueue = DispatchQueue(label: "socketServiceQueue", qos: .utility)
     
     func connect(with request: URLRequest, delegate: SocketServiceDelegate) {
         self._request = request
         self._webSocket = WebSocket(request: request)
         self.delegate = delegate
         
-        _webSocket.delegate = self
-        _webSocket.connect()
+        self._webSocket.callbackQueue = _socketDelegateQueue
+        self._webSocket.delegate = self
+        self._webSocket.connect()
     }
     
     func close() {
@@ -57,7 +58,7 @@ extension SocketService: WebSocketDelegate {
             do {
                 let decoder = JSONDecoder()
                 let jsonData = Data(message.utf8)
-                let model = try decoder.decode(SocketResponseCommand.self, from: jsonData)
+                let model = try decoder.decode(SocketResponseCommandModel.self, from: jsonData)
                 print(model)
                 delegate?.didReceive(model)
             } catch let error {

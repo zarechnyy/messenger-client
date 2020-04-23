@@ -90,7 +90,7 @@ extension MainVC: SocketServiceDelegate {
     
     func didReceive(_ error: Error?) { }
     
-    func didReceive(_ model: SocketResponseCommand) {
+    func didReceive(_ model: SocketResponseCommandModel) {
         switch model.model {
         case .users(let response):
             

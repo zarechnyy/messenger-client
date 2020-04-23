@@ -57,7 +57,7 @@ struct MyAppNavigation: AppNavigation {
         case .chatRoom(let key, let selectedUser):
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             let vc = storyboard.instantiateViewController(identifier: "ChatViewController") as! ChatVC
-            vc.userPubKey = key
+            vc.messageProcessService = MessageProcessService(userPubKey: key)
             vc.user = selectedUser
             return vc
         }

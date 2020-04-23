@@ -13,10 +13,9 @@ import SwiftyRSA
 
 class ChatVC: MessagesViewController {
         
-    var userPubKey: String!
     var user: ServerUserModel!
+    var messageProcessService: MessageProcessService!
     
-    private var _aes: AES256!
     private var _messages: [Message] = []
     private var _socketService: SocketService = SocketService()
     
@@ -28,9 +27,13 @@ class ChatVC: MessagesViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        messageProcessService.delegate = self
         configureSocketConnection()
+        
         configureMessageInputBar()
         configureMessageCollectionView()
+        
         self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Close", style: .plain, target: self, action: #selector(close))
     }
     
@@ -65,18 +68,20 @@ class ChatVC: MessagesViewController {
     }
     
     func insertMessage(_ message: Message) {
-        _messages.append(message)
-        
-        messagesCollectionView.performBatchUpdates({
-            messagesCollectionView.insertSections([_messages.count - 1])
-            if _messages.count >= 2 {
-                messagesCollectionView.reloadSections([_messages.count - 2])
-            }
-        }, completion: { [weak self] _ in
-            if self?.isLastSectionVisible() == true {
-                self?.messagesCollectionView.scrollToBottom(animated: true)
-            }
-        })
+        DispatchQueue.main.async {
+            self._messages.append(message)
+    
+            self.messagesCollectionView.performBatchUpdates({
+                self.messagesCollectionView.insertSections([self._messages.count - 1])
+                if self._messages.count >= 2 {
+                    self.messagesCollectionView.reloadSections([self._messages.count - 2])
+                }
+            }, completion: { [weak self] _ in
+                if self?.isLastSectionVisible() == true {
+                    self?.messagesCollectionView.scrollToBottom(animated: true)
+                }
+            })
+        }
     }
     
     func isLastSectionVisible() -> Bool {
@@ -95,25 +100,25 @@ extension ChatVC: SocketServiceDelegate {
     
     func didConnect() {
         let messegeModel = SocketMessageModel(message: "\(user.id)")
-        let socketOnConnectModel = SocketResponseCommand(type: 0, model: .create(messegeModel))
+        let socketOnConnectModel = SocketResponseCommandModel(type: 0, model: .create(messegeModel))
         _socketService.send(socketOnConnectModel)
     }
     
-    func didReceive(_ model: SocketResponseCommand) {
+    func didReceive(_ model: SocketResponseCommandModel) {
         switch model.type {
         case 1:
-            createKey()
+            messageProcessService.createKey()
         case 2:
             switch model.model {
             case .key(let keyModel):
-                updateKey(keyModel)
+                messageProcessService.updateKey(keyModel)
             default:
                 break
             }
         case 3:
             switch model.model {
             case .messageResponse(let msg):
-                updateMesseges(msg)
+                messageProcessService.decryptMessege(msg)
             default:
                 break
             }
@@ -136,97 +141,20 @@ extension ChatVC: SocketServiceDelegate {
     
     func didDisconnect() {
         _socketService.close()
-        self.navigationController?.popViewController(animated: true)
-    }
-    
-    private func createKey() {
-        do {
-            let pw = "myAwesomePassword"
-            let salt = AES256.randomSalt()
-            let iv = AES256.randomIv()
-            let key = try AES256.createKey(password: pw.data(using: .utf8)!, salt: salt)
-            _aes = try AES256(key: key, iv: iv)
-            
-            let encrKeys = encrypted(key.hexString, userPubKey)
-            let ecnrIvs = encrypted(iv.hexString, userPubKey)
-            guard let encrKey = encrKeys.0, let encrSign = encrKeys.1 else { return }
-            guard let encrIv = ecnrIvs.0, let encrIvSign = ecnrIvs.1 else { return }
-            
-            var socketKeyModel = SocketKeyModel(key: encrKey, iv: encrIv)
-            socketKeyModel.signatureKey = encrSign
-            socketKeyModel.signatureIv = encrIvSign
-            print(socketKeyModel)
-            _socketService.send(socketKeyModel)
-        } catch let error {
-            print(error)
+        DispatchQueue.main.async {
+            self.navigationController?.popViewController(animated: true)
         }
     }
-    
-    private func updateKey(_ model: SocketKeyModel) {
-         do {
-            guard
-                let privKey = User.current?.privateKey,
-                let key = decrypted(model.key, privKey, model.signatureKey),
-                let iv = decrypted(model.iv, privKey, model.signatureIv),
-                let keyData = key.dataFromHexadecimalString(),
-                let ivData = iv.dataFromHexadecimalString() else {
-                    assertionFailure("CANT UPDATE AES KEY!")
-                    return
-                }
-            _aes = try AES256(key: keyData, iv: ivData)
-         } catch let error {
-            print(error)
-         }
-     }
-    
-    private func encrypted(_ str: String,_ pubBKey: String) -> (String?, String?) {
-        do {
-            let clearStr = try ClearMessage(string: str, using: .utf8)
-            
-            guard let privKey = User.current?.privateKey else { return (nil, nil) }
-            let userAPrivateKey = try PrivateKey(pemEncoded: privKey)
-            let sign = try clearStr.signed(with: userAPrivateKey, digestType: .sha256)
-            
-            let clientPubKey = try PublicKey(pemEncoded: pubBKey)
-            let encrStr = try clearStr.encrypted(with: clientPubKey, padding: .PKCS1)
-            
-            return (encrStr.base64String, sign.base64String)
-        } catch let err {
-            print(err)
-            return (nil, nil)
-        }
-    }
+}
 
-    private func decrypted(_ str: String, _ privKey: String,_ sign: String) -> String? {
-        do {
-            let privateKey = try PrivateKey(pemEncoded: privKey)
-            let encryptedStr = try EncryptedMessage(base64Encoded: str)
-            let decrStr = try encryptedStr.decrypted(with: privateKey, padding: .PKCS1)
-        
-            let signature = try Signature(base64Encoded: sign)
-            let pubKey = try PublicKey(pemEncoded: userPubKey)
-            let isSuccess = try decrStr.verify(with: pubKey, signature: signature, digestType: .sha256)
-            
-            return isSuccess ? try decrStr.string(encoding: .utf8) : nil
-        } catch let err {
-            print(err)
-            return nil
-        }
+extension ChatVC: MessageProcessServiceDelegate {
+    func didReceiveNew(_ message: String) {
+        let message = Message(sender: self.user, messageId: UUID().uuidString, sentDate: Date(), kind: .text(message))
+        self.insertMessage(message)
     }
-
-    private func updateMesseges(_ message: SocketDataStringModel) {
-        do {
-            guard let data = Data(base64Encoded: message.data) else {
-                print("NO DATA TO SEND :(")
-                return
-            }
-            let encrData = try _aes.decrypt(data)
-            let str = String(decoding: encrData, as: UTF8.self)
-            let message = Message(sender: user, messageId: UUID().uuidString, sentDate: Date(), kind: .text(str))
-            insertMessage(message)
-        } catch {
-            print(error)
-        }
+    
+    func shouldSend<T>(_ model: T) where T : Encodable {
+        _socketService.send(model)
     }
 }
 
@@ -343,14 +271,7 @@ extension ChatVC: InputBarAccessoryViewDelegate {
         self.insertMessages(components, userModel)
         for component in components {
             if  let str = component as? String {
-                do {
-                    guard let strData = str.data(using: .utf8) else { return }
-                    let encrMsgData = try _aes.encrypt(strData)
-                    let msgModel = SocketResponseCommand(type: 3, model: .message(SocketDataModel(data: [UInt8](encrMsgData))))
-                    _socketService.send(msgModel)
-                } catch {
-                    print(error)
-                }
+                messageProcessService.encryptMessege(str)
             }
         }
         self.messagesCollectionView.scrollToBottom(animated: true)

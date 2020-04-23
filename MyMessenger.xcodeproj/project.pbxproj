@@ -21,6 +21,7 @@
 		2E2EC23423F0448000CACDB9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2E2EC23323F0448000CACDB9 /* Assets.xcassets */; };
 		2E2EC23723F0448000CACDB9 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2E2EC23523F0448000CACDB9 /* LaunchScreen.storyboard */; };
 		2E40742F244FA49F0020C977 /* Data+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E40742E244FA49F0020C977 /* Data+Extensions.swift */; };
+		2E4074312450CD200020C977 /* SocketModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E4074302450CD200020C977 /* SocketModels.swift */; };
 		2E560ED1244450C600FAF82C /* SocketService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E560ED0244450C600FAF82C /* SocketService.swift */; };
 		2E6DFF86243913F40072A412 /* AuthModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E6DFF85243913F40072A412 /* AuthModels.swift */; };
 		2E6DFF882439150C0072A412 /* ServerUserModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E6DFF872439150C0072A412 /* ServerUserModel.swift */; };
@@ -29,7 +30,8 @@
 		2E819FE1243F998600EB01DF /* CurrentUserModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E819FE0243F998600EB01DF /* CurrentUserModel.swift */; };
 		2E9260FB243DD453000A196F /* NetworkingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E9260FA243DD453000A196F /* NetworkingService.swift */; };
 		2E9260FF243E06BC000A196F /* AES.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E9260FE243E06BC000A196F /* AES.swift */; };
-		2E926102243E342A000A196F /* SocketModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E926101243E342A000A196F /* SocketModels.swift */; };
+		2E926102243E342A000A196F /* SocketResponseCommandModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E926101243E342A000A196F /* SocketResponseCommandModel.swift */; };
+		2EC4EDDA24518C78005957F5 /* MessageProcessService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EC4EDD924518C78005957F5 /* MessageProcessService.swift */; };
 		2EC6F5C2244123A300E1A6F9 /* MessageModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EC6F5C1244123A300E1A6F9 /* MessageModel.swift */; };
 		2EE99E0824202D7C00880E74 /* MainVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EE99E0724202D7C00880E74 /* MainVC.swift */; };
 		2EE99E0A24202D8700880E74 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2EE99E0924202D8700880E74 /* Main.storyboard */; };
@@ -54,6 +56,7 @@
 		2E2EC23623F0448000CACDB9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		2E2EC23823F0448100CACDB9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2E40742E244FA49F0020C977 /* Data+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Extensions.swift"; sourceTree = "<group>"; };
+		2E4074302450CD200020C977 /* SocketModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketModels.swift; sourceTree = "<group>"; };
 		2E560ED0244450C600FAF82C /* SocketService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketService.swift; sourceTree = "<group>"; };
 		2E6DFF85243913F40072A412 /* AuthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthModels.swift; sourceTree = "<group>"; };
 		2E6DFF872439150C0072A412 /* ServerUserModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerUserModel.swift; sourceTree = "<group>"; };
@@ -62,7 +65,8 @@
 		2E819FE0243F998600EB01DF /* CurrentUserModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentUserModel.swift; sourceTree = "<group>"; };
 		2E9260FA243DD453000A196F /* NetworkingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkingService.swift; sourceTree = "<group>"; };
 		2E9260FE243E06BC000A196F /* AES.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AES.swift; sourceTree = "<group>"; };
-		2E926101243E342A000A196F /* SocketModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketModels.swift; sourceTree = "<group>"; };
+		2E926101243E342A000A196F /* SocketResponseCommandModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketResponseCommandModel.swift; sourceTree = "<group>"; };
+		2EC4EDD924518C78005957F5 /* MessageProcessService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageProcessService.swift; sourceTree = "<group>"; };
 		2EC6F5C1244123A300E1A6F9 /* MessageModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageModel.swift; sourceTree = "<group>"; };
 		2EE99E0724202D7C00880E74 /* MainVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainVC.swift; sourceTree = "<group>"; };
 		2EE99E0924202D8700880E74 /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
@@ -168,9 +172,9 @@
 		2E067C9623F995F80022D3A5 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				2E819FDF243E441400EB01DF /* Networking */,
 				2E067C9523F995F20022D3A5 /* User */,
 				2E926100243E3421000A196F /* Models */,
-				2E819FDF243E441400EB01DF /* Networking */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -222,6 +226,7 @@
 			isa = PBXGroup;
 			children = (
 				2E560ED0244450C600FAF82C /* SocketService.swift */,
+				2EC4EDD924518C78005957F5 /* MessageProcessService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -245,7 +250,8 @@
 		2E926100243E3421000A196F /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				2E926101243E342A000A196F /* SocketModels.swift */,
+				2E4074302450CD200020C977 /* SocketModels.swift */,
+				2E926101243E342A000A196F /* SocketResponseCommandModel.swift */,
 				2E6DFF85243913F40072A412 /* AuthModels.swift */,
 				2E6DFF872439150C0072A412 /* ServerUserModel.swift */,
 				2E6DFF89243915410072A412 /* StartChatModel.swift */,
@@ -428,12 +434,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				2E9260FB243DD453000A196F /* NetworkingService.swift in Sources */,
-				2E926102243E342A000A196F /* SocketModels.swift in Sources */,
+				2E926102243E342A000A196F /* SocketResponseCommandModel.swift in Sources */,
 				2E067C8F23F98EBA0022D3A5 /* MyNavigation.swift in Sources */,
 				2E2EC22F23F0447F00CACDB9 /* LoginVC.swift in Sources */,
 				2E067C8223F98B260022D3A5 /* SplashScreen.swift in Sources */,
 				2E6DFF86243913F40072A412 /* AuthModels.swift in Sources */,
 				2E2EC22B23F0447F00CACDB9 /* AppDelegate.swift in Sources */,
+				2E4074312450CD200020C977 /* SocketModels.swift in Sources */,
 				2EE99E0824202D7C00880E74 /* MainVC.swift in Sources */,
 				2E9260FF243E06BC000A196F /* AES.swift in Sources */,
 				2E6DFF8A243915410072A412 /* StartChatModel.swift in Sources */,
@@ -445,6 +452,7 @@
 				2E067C8823F98D0A0022D3A5 /* SignUpVC.swift in Sources */,
 				2EC6F5C2244123A300E1A6F9 /* MessageModel.swift in Sources */,
 				2E819FE1243F998600EB01DF /* CurrentUserModel.swift in Sources */,
+				2EC4EDDA24518C78005957F5 /* MessageProcessService.swift in Sources */,
 				2E067C8C23F98E890022D3A5 /* Router.swift in Sources */,
 				2E40742F244FA49F0020C977 /* Data+Extensions.swift in Sources */,
 				2E751C01242A9F1C001AB647 /* ChatVC.swift in Sources */,
