@@ -15,6 +15,7 @@ class ChatVC: MessagesViewController {
         
     var user: ServerUserModel!
     var messageProcessService: MessageProcessService!
+    var isChatStarted: Bool = false
     
     private var _messages: [Message] = []
     private var _socketService: SocketService = SocketService()
@@ -106,12 +107,17 @@ extension ChatVC: SocketServiceDelegate {
     
     func didReceive(_ model: SocketResponseCommandModel) {
         switch model.type {
+        case -1:
+            let model = SocketResponseCommandModel(type: -1, model: .create(SocketMessageModel(message: "pong")))
+            _socketService.send(model)
+            isChatStarted = true
         case 1:
             messageProcessService.createKey()
         case 2:
             switch model.model {
             case .key(let keyModel):
                 messageProcessService.updateKey(keyModel)
+                isChatStarted = true
             default:
                 break
             }
@@ -123,15 +129,15 @@ extension ChatVC: SocketServiceDelegate {
                 break
             }
         case 5:
-            print(model)
             switch model.model {
             case .create(_):
-                self.navigationController?.popViewController(animated: true)
+                DispatchQueue.main.async {
+                    self.navigationController?.popViewController(animated: true)
+                }
             default: break
             }
         default:
             print("Unknown command!")
-            print(model)
         }
     }
  
@@ -257,24 +263,33 @@ extension ChatVC: MessagesLayoutDelegate {
 
 extension ChatVC: InputBarAccessoryViewDelegate {
     func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith text: String) {
+        if isChatStarted {
+            
+            let components = inputBar.inputTextView.components
+            messageInputBar.inputTextView.text = String()
+            messageInputBar.invalidatePlugins()
 
-        let components = inputBar.inputTextView.components
-        messageInputBar.inputTextView.text = String()
-        messageInputBar.invalidatePlugins()
-
-        // Send button activity animation
-        messageInputBar.sendButton.startAnimating()
-        messageInputBar.inputTextView.placeholder = "Sending..."
-        self.messageInputBar.sendButton.stopAnimating()
-        self.messageInputBar.inputTextView.placeholder = "Aa"
-        guard let userModel = CurrentUserModel.shared.model else { return }
-        self.insertMessages(components, userModel)
-        for component in components {
-            if  let str = component as? String {
-                messageProcessService.encryptMessege(str)
+            // Send button activity animation
+            messageInputBar.sendButton.startAnimating()
+            messageInputBar.inputTextView.placeholder = "Sending..."
+            self.messageInputBar.sendButton.stopAnimating()
+            self.messageInputBar.inputTextView.placeholder = "Aa"
+            
+            guard let userModel = CurrentUserModel.shared.model else { return }
+            self.insertMessages(components, userModel)
+            for component in components {
+                if  let str = component as? String {
+                    messageProcessService.encryptMessege(str)
+                }
             }
+            self.messagesCollectionView.scrollToBottom(animated: true)
+        } else {
+            
+            let alert = UIAlertController(title: "Chat is not started", message: nil, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
+            
+            present(alert, animated: true, completion: nil)
         }
-        self.messagesCollectionView.scrollToBottom(animated: true)
     }
     
     private func insertMessages(_ data: [Any], _ user: ServerUserModel) {

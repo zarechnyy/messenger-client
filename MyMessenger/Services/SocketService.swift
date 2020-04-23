@@ -36,7 +36,7 @@ class SocketService {
     }
     
     func close() {
-        _webSocket.disconnect(closeCode: 1)
+        _webSocket.disconnect(closeCode: 1000)
     }
     
     func send<T: Encodable>(_ model: T) {
@@ -59,7 +59,6 @@ extension SocketService: WebSocketDelegate {
                 let decoder = JSONDecoder()
                 let jsonData = Data(message.utf8)
                 let model = try decoder.decode(SocketResponseCommandModel.self, from: jsonData)
-                print(model)
                 delegate?.didReceive(model)
             } catch let error {
                 print(error)

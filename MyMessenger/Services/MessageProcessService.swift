@@ -41,7 +41,6 @@ final class MessageProcessService {
             var socketKeyModel = SocketKeyModel(key: encrKey, iv: encrIv)
             socketKeyModel.signatureKey = encrSign
             socketKeyModel.signatureIv = encrIvSign
-            print(socketKeyModel)
             delegate?.shouldSend(socketKeyModel)
 
         } catch let error {
@@ -76,8 +75,6 @@ final class MessageProcessService {
             let encrData = try _aes.decrypt(data)
             let message = String(decoding: encrData, as: UTF8.self)
             delegate?.didReceiveNew(message)
-    //           let message = Message(sender: user, messageId: UUID().uuidString, sentDate: Date(), kind: .text(str))
-    //           insertMessage(message)
        } catch {
            print(error)
        }
